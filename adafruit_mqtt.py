@@ -75,3 +75,5 @@ while True:
     client.publish('pressure', press)
     print('pressure published')
     time.sleep(45)
+
+    #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
