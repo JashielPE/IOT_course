@@ -1,8 +1,13 @@
 # Import standard library python modules
-import sys
+led1 = 21
+import RPi.GPIO as GPIO
+import sys, board, adafruit_dht
 import time
 import random
 
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(led1, GPIO.OUT)
+dhtDevice = adafruit_dht.DHT11(board.D21)
 # This example uses the MQTTClient instead of the REST client
 from Adafruit_IO import MQTTClient
 
@@ -27,7 +32,6 @@ def connected(client):
     # Subscribe to changes on a feed named Counter.
     print('Subscribing to feed {0}'.format(FEED_ID))
     client.subscribe(FEED_ID)
-    client.subscribe('freq')
     print('Waiting for feed data')
 
 
@@ -48,9 +52,9 @@ def message(client, feed_id, payload):
     print('Actual payload is ', payload)
     if feed_id == 'led':
         if payload == 'ON':
-            print('turn on LED here')
+            GPIO.output(led1, True)
         if payload == 'OFF':
-            print('turn off LED here')
+            GPIO.output(led1, False)
 
 
 # Create an MQTT client instance
@@ -71,9 +75,21 @@ client.loop_background()
 #Alternatively, you can simply block your program for waiting for incoming stream of
 # data from subscription and the message function will take care of stuffs
 while True:
-    press = random.randint(10000, 12000)
-    client.publish('pressure', press)
-    print('pressure published')
-    time.sleep(45)
+    try:
+        # Print the values to the serial port
+        temperature_c = dhtDevice.temperature
+        temperature_f = temperature_c * (9 / 5) + 32
+        humidity = dhtDevice.humidity
+        client.publish('temp', temperature_c)
+        print('temperature published')
 
-    #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
+    except RuntimeError as error:
+        # Errors happen fairly often, DHT's are hard to read, just keep going
+        print(error.args[0])
+        time.sleep(2.0)
+        continue
+    except Exception as error:
+        dhtDevice.exit()
+        raise error
+
+    time.sleep(10)
