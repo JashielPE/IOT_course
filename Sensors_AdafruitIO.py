@@ -1,5 +1,5 @@
 # Import standard library python modules
-led1 = 21
+led1 = 20
 import RPi.GPIO as GPIO
 import sys, board, adafruit_dht
 import time
@@ -13,7 +13,7 @@ from Adafruit_IO import MQTTClient
 
 # Set to your Adafruit IO Key
 # Remember not to publish it when you publish this code
-ADAFRUIT_IO_KEY = 'aio_IbOT84Rs6ypUMTnoLWYPCTiJMjg4'
+ADAFRUIT_IO_KEY = 'aio_IYFW70Q5MYSDqpqQbXxUu6czTUdq'
 
 # Set to your Adafruit IO username.
 ADAFRUIT_IO_USERNAME = 'Jashiel'
@@ -81,7 +81,7 @@ while True:
         temperature_f = temperature_c * (9 / 5) + 32
         humidity = dhtDevice.humidity
         client.publish('temp', temperature_c)
-        print('temperature published')
+        print('temperature published: ', temperature_c)
 
     except RuntimeError as error:
         # Errors happen fairly often, DHT's are hard to read, just keep going
@@ -92,4 +92,4 @@ while True:
         dhtDevice.exit()
         raise error
 
-    time.sleep(10)
+    time.sleep(5)
